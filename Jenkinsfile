@@ -1,6 +1,5 @@
 pipeline {
     agent any
-
     stages {
         stage('Git Checkout') {
             steps {
@@ -14,7 +13,11 @@ pipeline {
         } 
         stage("Docker Tag") {
             steps {
-                sh 'docker tag library:latest 107531495718.dkr.ecr.us-east-1.amazonaws.com/libraryapp:latest'
+                sh '''
+                docker tag library:latest 107531495718.dkr.ecr.us-east-1.amazonaws.com/libraryapp:latest
+                tag=`cat version.json | jq -r '.version'`
+                docker tag library:latest 107531495718.dkr.ecr.us-east-1.amazonaws.com/libraryapp:"$tag"
+                '''
             }
         }
         stage("ECR Login"){
@@ -24,7 +27,11 @@ pipeline {
         }
         stage("Docker Push"){
             steps{
-                sh 'docker push 107531495718.dkr.ecr.us-east-1.amazonaws.com/libraryapp:latest'
+                sh '''
+                docker push 107531495718.dkr.ecr.us-east-1.amazonaws.com/libraryapp:latest
+                tag=`cat version.json | jq -r '.version'`
+                docker push 107531495718.dkr.ecr.us-east-1.amazonaws.com/libraryapp:"$tag"
+                '''
             }
         }  
     }
